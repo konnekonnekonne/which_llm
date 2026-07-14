@@ -62,7 +62,11 @@ h1 {
   color: var(--muted);
   font-size: 1.05rem;
   max-width: 560px;
-  margin: 0 auto;
+  margin: 0 auto 16px;
+}
+
+.subtitle:last-child {
+  margin-bottom: 0;
 }
 
 #query-form {
