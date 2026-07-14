@@ -17,9 +17,9 @@ const SYSTEM_PROMPT = `You recommend the most cost-efficient LLM for a task a us
 Given the user's goal, do the following:
 1. Identify which task in the Task Taxonomy (T1-T21) it matches best. For broad-but-common requests (e.g. "write code for a website"), do NOT ask a question — just pick the single most likely/dominant task yourself (default T11 Code generation for general "write code" / "build a website" requests, unless the request explicitly signals complex multi-file/agentic work, in which case use T12) and proceed.
 2. Pick a Budget, Balanced, and Premium recommendation for that task from the Capability-to-Task Mapping tables (or the Multimodal generation section for T17/T19), using the actual model names and prices listed there. The Multimodal generation section only lists Budget and Premium tiers for T17/T19 — when there's no distinct third model listed, it's fine to reuse the Premium pick as the Balanced pick too rather than inventing an unlisted model.
-3. Write ONE short sentence per tier explaining the pick (not a paragraph, not multiple sentences).
+3. Write ONE short sentence per tier explaining the pick — hard cap of roughly 12 words / 80 characters, not a paragraph, not multiple sentences. The overall "summary" field also has a hard cap of roughly 25 words / 160 characters. This is a fixed-size UI card, not a report — long text gets cut off, so brevity is a hard requirement, not a style preference.
 
-Call the provide_recommendation tool with your answer. Keep every field brief — this is a quick-glance UI, not a report.
+Call the provide_recommendation tool with your answer.
 
 You may ask ONE short clarifying question instead, but only when the request is genuinely ambiguous between very different tasks that would lead to a materially different recommendation, and you truly cannot make a reasonable default choice (e.g. "analyze this" could mean data analysis, scientific research, or image analysis — very different tiers). This should be rare. To ask, call the tool with ONLY the "question" field set (omit every other field). If the message you receive already contains a "Clarifying question asked" and "User's answer" (i.e. this is a follow-up), use that context to answer directly — do not ask a second question.
 
@@ -61,6 +61,13 @@ const TOOLS = [
     },
   },
 ];
+
+// Safety net: keeps card text within the UI's reserved layout space even if
+// the model ignores the length guidance in the prompt.
+function truncate(text, maxLength) {
+  if (typeof text !== 'string' || text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength - 1).trimEnd()}…`;
+}
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -136,10 +143,22 @@ exports.handler = async (event) => {
 
     const result = {
       task: input.task,
-      budget: { model: input.budget_model, price: input.budget_price, why: input.budget_why },
-      balanced: { model: input.balanced_model, price: input.balanced_price, why: input.balanced_why },
-      premium: { model: input.premium_model, price: input.premium_price, why: input.premium_why },
-      summary: input.summary,
+      budget: {
+        model: truncate(input.budget_model, 45),
+        price: truncate(input.budget_price, 55),
+        why: truncate(input.budget_why, 90),
+      },
+      balanced: {
+        model: truncate(input.balanced_model, 45),
+        price: truncate(input.balanced_price, 55),
+        why: truncate(input.balanced_why, 90),
+      },
+      premium: {
+        model: truncate(input.premium_model, 45),
+        price: truncate(input.premium_price, 55),
+        why: truncate(input.premium_why, 90),
+      },
+      summary: truncate(input.summary, 170),
     };
 
     return {

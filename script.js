@@ -66,7 +66,7 @@ async function submitQuery(query) {
     }
 
     renderResults(data);
-    setStatus('', 'none', true);
+    setStatus('', 'none');
     resetConversation();
   } catch (err) {
     setStatus('Network error. Please try again.', 'error');
@@ -82,8 +82,7 @@ function resetConversation() {
   submitBtn.textContent = DEFAULT_BUTTON_LABEL;
 }
 
-function setStatus(message, type, hide = false) {
-  statusEl.hidden = hide || !message;
+function setStatus(message, type) {
   statusEl.textContent = message;
   statusEl.classList.toggle('error', type === 'error');
   statusEl.classList.toggle('question', type === 'question');
