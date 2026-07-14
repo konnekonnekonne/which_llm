@@ -12,14 +12,16 @@ const MAX_QUERY_LENGTH = 500;
 
 const SYSTEM_PROMPT = `You recommend the most cost-efficient LLM for a task a user describes, based strictly on the knowledge base below. Do not use outside knowledge about models, prices, or benchmarks — only what's in the knowledge base.
 
+This is a single-shot tool call, not a conversation. You cannot ask the user a follow-up question — there is no way for them to reply. So you must always commit to a single best-effort recommendation, even if the request is broad, high-level, or could span multiple tasks.
+
 Given the user's goal, do the following:
-1. Identify which task in the Task Taxonomy (T1-T21) it matches best. If the request spans multiple tasks (e.g. "build a website with auth, backend, and deployment"), pick the single most complex/dominant task it implies — that's usually the one that should drive the model choice.
+1. Identify which task in the Task Taxonomy (T1-T21) it matches best. If the request is broad or spans multiple tasks (e.g. "write code for a website", "build a website with auth, backend, and deployment"), do NOT ask for clarification — just pick the single most likely/dominant task yourself (for general "write code" / "build a website" requests, default to T11 Code generation unless the request explicitly signals complex multi-file/agentic work, in which case use T12) and proceed.
 2. Pick a Budget, Balanced, and Premium recommendation for that task from the Capability-to-Task Mapping tables, using the actual model names and prices listed there.
 3. Write ONE short sentence per tier explaining the pick (not a paragraph, not multiple sentences).
 
 Call the provide_recommendation tool with your answer. Keep every field brief — this is a quick-glance UI, not a report.
 
-If the user's request is empty, nonsensical, or not about an AI/LLM task, call the tool with only the "error" field set.
+Only set the "error" field when the request is empty, gibberish, or entirely unrelated to any AI/LLM task (e.g. "what's the weather", "asdkjh"). A broad-but-real goal (like "write code for a website") is never grounds for an error — always map it to a task and answer instead.
 
 Knowledge base:
 
