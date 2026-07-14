@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Which Model? — Find the cheapest LLM that's good enough</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Which Model?</h1>
+      <p class="subtitle">Tell us what you want to do with AI. We'll recommend the cheapest model that's good enough — and what to use if you need more.</p>
+    </header>
+
+    <form id="query-form">
+      <input
+        type="text"
+        id="query-input"
+        placeholder="e.g. summarize a transcript, write code for a website, generate an image..."
+        autocomplete="off"
+        maxlength="500"
+        required
+      />
+      <button type="submit" id="submit-btn">Recommend</button>
+    </form>
+
+    <div id="status" class="status" hidden></div>
+
+    <section id="results" class="results" hidden>
+      <p class="task-label" id="task-label"></p>
+      <div class="cards">
+        <article class="card budget">
+          <h2>Budget</h2>
+          <p class="model" id="budget-model"></p>
+          <p class="price" id="budget-price"></p>
+          <p class="why" id="budget-why"></p>
+        </article>
+        <article class="card balanced">
+          <h2>Balanced</h2>
+          <p class="model" id="balanced-model"></p>
+          <p class="price" id="balanced-price"></p>
+          <p class="why" id="balanced-why"></p>
+        </article>
+        <article class="card premium">
+          <h2>Premium</h2>
+          <p class="model" id="premium-model"></p>
+          <p class="price" id="premium-price"></p>
+          <p class="why" id="premium-why"></p>
+        </article>
+      </div>
+      <p class="summary" id="summary"></p>
+    </section>
+
+    <footer>
+      <p>Prices and picks are pulled from a knowledge base snapshot dated July 2026 — verify before production use.</p>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
