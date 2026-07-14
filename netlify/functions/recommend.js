@@ -25,6 +25,8 @@ Knowledge base:
 
 ${KNOWLEDGE_BASE}`;
 
+// Flat schema (no nested objects) — smaller/faster models are more reliable
+// filling flat fields than deeply nested tool-use inputs.
 const TOOLS = [
   {
     name: 'provide_recommendation',
@@ -37,30 +39,15 @@ const TOOLS = [
           description: 'Set only when the request is empty, nonsensical, or not about an AI/LLM task. Omit this field entirely otherwise.',
         },
         task: { type: 'string', description: "Short label for the identified task, e.g. 'Text summarization'" },
-        budget: {
-          type: 'object',
-          properties: {
-            model: { type: 'string' },
-            price: { type: 'string' },
-            why: { type: 'string', description: 'One short sentence.' },
-          },
-        },
-        balanced: {
-          type: 'object',
-          properties: {
-            model: { type: 'string' },
-            price: { type: 'string' },
-            why: { type: 'string', description: 'One short sentence.' },
-          },
-        },
-        premium: {
-          type: 'object',
-          properties: {
-            model: { type: 'string' },
-            price: { type: 'string' },
-            why: { type: 'string', description: 'One short sentence.' },
-          },
-        },
+        budget_model: { type: 'string' },
+        budget_price: { type: 'string' },
+        budget_why: { type: 'string', description: 'One short sentence.' },
+        balanced_model: { type: 'string' },
+        balanced_price: { type: 'string' },
+        balanced_why: { type: 'string', description: 'One short sentence.' },
+        premium_model: { type: 'string' },
+        premium_price: { type: 'string' },
+        premium_why: { type: 'string', description: 'One short sentence.' },
         summary: { type: 'string', description: 'One sentence overall recommendation.' },
       },
     },
@@ -121,10 +108,28 @@ exports.handler = async (event) => {
       return { statusCode: 502, body: JSON.stringify({ error: 'Could not parse a recommendation. Please try rephrasing your request.' }) };
     }
 
+    const input = toolUse.input || {};
+
+    if (input.error) {
+      return {
+        statusCode: 200,
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ error: input.error }),
+      };
+    }
+
+    const result = {
+      task: input.task,
+      budget: { model: input.budget_model, price: input.budget_price, why: input.budget_why },
+      balanced: { model: input.balanced_model, price: input.balanced_price, why: input.balanced_why },
+      premium: { model: input.premium_model, price: input.premium_price, why: input.premium_why },
+      summary: input.summary,
+    };
+
     return {
       statusCode: 200,
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(toolUse.input),
+      body: JSON.stringify(result),
     };
   } catch (err) {
     console.error('Unexpected error', err);
