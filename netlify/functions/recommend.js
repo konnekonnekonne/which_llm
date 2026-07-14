@@ -8,20 +8,20 @@ const KNOWLEDGE_BASE = fs.readFileSync(
 
 const MODEL = 'claude-haiku-4-5-20251001';
 const MAX_TOKENS = 1024;
-const MAX_QUERY_LENGTH = 500;
+const MAX_QUERY_LENGTH = 1000;
 
 const SYSTEM_PROMPT = `You recommend the most cost-efficient LLM for a task a user describes, based strictly on the knowledge base below. Do not use outside knowledge about models, prices, or benchmarks — only what's in the knowledge base.
 
-This is a single-shot tool call, not a conversation. You cannot ask the user a follow-up question — there is no way for them to reply. So you must always commit to a single best-effort recommendation, even if the request is broad, high-level, or could span multiple tasks.
-
 Given the user's goal, do the following:
-1. Identify which task in the Task Taxonomy (T1-T21) it matches best. If the request is broad or spans multiple tasks (e.g. "write code for a website", "build a website with auth, backend, and deployment"), do NOT ask for clarification — just pick the single most likely/dominant task yourself (for general "write code" / "build a website" requests, default to T11 Code generation unless the request explicitly signals complex multi-file/agentic work, in which case use T12) and proceed.
+1. Identify which task in the Task Taxonomy (T1-T21) it matches best. For broad-but-common requests (e.g. "write code for a website"), do NOT ask a question — just pick the single most likely/dominant task yourself (default T11 Code generation for general "write code" / "build a website" requests, unless the request explicitly signals complex multi-file/agentic work, in which case use T12) and proceed.
 2. Pick a Budget, Balanced, and Premium recommendation for that task from the Capability-to-Task Mapping tables, using the actual model names and prices listed there.
 3. Write ONE short sentence per tier explaining the pick (not a paragraph, not multiple sentences).
 
 Call the provide_recommendation tool with your answer. Keep every field brief — this is a quick-glance UI, not a report.
 
-Only set the "error" field when the request is empty, gibberish, or entirely unrelated to any AI/LLM task (e.g. "what's the weather", "asdkjh"). A broad-but-real goal (like "write code for a website") is never grounds for an error — always map it to a task and answer instead.
+You may ask ONE short clarifying question instead, but only when the request is genuinely ambiguous between very different tasks that would lead to a materially different recommendation, and you truly cannot make a reasonable default choice (e.g. "analyze this" could mean data analysis, scientific research, or image analysis — very different tiers). This should be rare. To ask, call the tool with ONLY the "question" field set (omit every other field). If the message you receive already contains a "Clarifying question asked" and "User's answer" (i.e. this is a follow-up), use that context to answer directly — do not ask a second question.
+
+Only set the "error" field when the request is empty, gibberish, or entirely unrelated to any AI/LLM task (e.g. "what's the weather", "asdkjh"). A broad-but-real goal is never grounds for an error — map it to a task (asking one clarifying question first if truly needed) instead.
 
 Knowledge base:
 
@@ -39,6 +39,10 @@ const TOOLS = [
         error: {
           type: 'string',
           description: 'Set only when the request is empty, nonsensical, or not about an AI/LLM task. Omit this field entirely otherwise.',
+        },
+        question: {
+          type: 'string',
+          description: 'A single short clarifying question. Set only when the request is genuinely ambiguous between very different tasks — rare. When set, omit every other field.',
         },
         task: { type: 'string', description: "Short label for the identified task, e.g. 'Text summarization'" },
         budget_model: { type: 'string' },
@@ -117,6 +121,14 @@ exports.handler = async (event) => {
         statusCode: 200,
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ error: input.error }),
+      };
+    }
+
+    if (input.question) {
+      return {
+        statusCode: 200,
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ question: input.question }),
       };
     }
 
