@@ -3,10 +3,21 @@ const input = document.getElementById('query-input');
 const submitBtn = document.getElementById('submit-btn');
 const statusEl = document.getElementById('status');
 const results = document.getElementById('results');
+const examples = document.getElementById('examples');
 
-form.addEventListener('submit', async (e) => {
+form.addEventListener('submit', (e) => {
   e.preventDefault();
-  const query = input.value.trim();
+  submitQuery(input.value.trim());
+});
+
+examples.addEventListener('click', (e) => {
+  if (!e.target.classList.contains('example-chip')) return;
+  const query = e.target.textContent;
+  input.value = query;
+  submitQuery(query);
+});
+
+async function submitQuery(query) {
   if (!query) return;
 
   setStatus('Thinking...', false);
@@ -33,7 +44,7 @@ form.addEventListener('submit', async (e) => {
   } finally {
     submitBtn.disabled = false;
   }
-});
+}
 
 function setStatus(message, isError, hide = false) {
   statusEl.hidden = hide || !message;
