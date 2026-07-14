@@ -2,7 +2,7 @@
 
 A tiny site that recommends the cheapest LLM that's good enough for a task you describe — and what to use if you need more quality.
 
-**Live:** https://whichllm.netlify.app
+**Live:** [whichllm.netlify.app](https://whichllm.netlify.app)
 
 ## How it works
 
