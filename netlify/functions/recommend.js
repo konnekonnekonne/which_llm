@@ -6,7 +6,7 @@ const KNOWLEDGE_BASE = fs.readFileSync(
   'utf-8'
 );
 
-const MODEL = 'claude-haiku-4-5';
+const MODEL = 'claude-haiku-4-5-20251001';
 const MAX_TOKENS = 800;
 const MAX_QUERY_LENGTH = 500;
 
