@@ -2,7 +2,7 @@
 
 A tiny site that recommends the cheapest LLM that's good enough for a task you describe — and what to use if you need more quality.
 
-**Live:** [whichllm.netlify.app](https://whichllm.netlify.app)
+This was a working prototype; the Netlify deployment has since been taken down, but the code is kept here for reference.
 
 ## How it works
 
@@ -41,7 +41,7 @@ This serves the static site and the function together at `http://localhost:8888`
 
 ## Deployment
 
-Connected to Netlify with auto-deploy on push to `main`. The only required environment variable in the Netlify dashboard (Site configuration → Environment variables) is:
+No longer deployed. It previously ran on Netlify with auto-deploy on push to `main`; to redeploy, connect a new Netlify site to this repo. The only required environment variable (Site configuration → Environment variables) is:
 
 - `ANTHROPIC_API_KEY` — your Anthropic API key. Never committed to the repo.
 
